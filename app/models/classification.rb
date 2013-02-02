@@ -1,4 +1,5 @@
 class Classification
+
   delegate :hostgroup, :environment_id,
            :to => :host
 
@@ -7,17 +8,18 @@ class Classification
   end
 
   def enc
-    klasses  = { }
-    key_hash = hashed_class_parameters
-    values   = values_hash
+    klasses    = { }
+    key_hash   = hashed_class_parameters
+    values     = values_hash
+    saferender = SafeRender.new(:variables => { :host => @host } )
     classes.each do |klass|
       klasses[klass.name] ||= { }
       if key_hash[klass.id]
         key_hash[klass.id].each do |param|
           klasses[klass.name][param.to_s] = if values[param.id] and values[param.id][param.to_s]
-                                              values[param.id][param.to_s][:value]
+                                              saferender.parse(values[param.id][param.to_s][:value])
                                             else
-                                              param.default_value
+                                              saferender.parse(param.default_value)
                                             end
         end
       else
