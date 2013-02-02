@@ -359,6 +359,10 @@ class Host::Managed < Host::Base
     end
     param.update self.params
 
+    # Parse ERB values contained in the parameters
+    s=SafeRender.new(:variables => { :host => self} )
+    param.each { |k,v| param[k] = s.parse(v) }
+
     classes = if Setting[:Parametrized_Classes_in_ENC] && Setting[:Enable_Smart_Variables_in_ENC]
                 lookup_keys_class_params
               else
