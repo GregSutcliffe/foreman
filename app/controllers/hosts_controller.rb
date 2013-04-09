@@ -476,6 +476,7 @@ class HostsController < ApplicationController
       @host = Host::Managed.new(params['host'])
     else
       @host = Host::Base.find_by_id(params['host_id'])
+      @host ||= Host::Managed.new
     end
     # If we found a host from another STI type, convert it so we can call Managed methods on it
     unless @host.class.name == "Host::Managed"
