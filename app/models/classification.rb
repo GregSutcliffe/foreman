@@ -11,7 +11,7 @@ class Classification
     klasses    = { }
     key_hash   = hashed_class_parameters
     values     = values_hash
-    saferender = SafeRender.new(:variables => { :host => @host } )
+    saferender = SafeRender.new(:methods => [], :variables => { :host => @host } )
     classes.each do |klass|
       klasses[klass.name] ||= { }
       if key_hash[klass.id]

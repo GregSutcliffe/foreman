@@ -4,6 +4,8 @@
 # so that <%= @host.name %> has the right @host variable
 #
 class SafeRender
+  include Rails.application.routes.url_helpers
+  include UnattendedHelper
 
   def initialize args = {}
     @allowed_methods = args[:methods]   || []
@@ -29,6 +31,9 @@ class SafeRender
   def parse_string string
     return unless string.is_a? String
 
+    # @host gets used in lots of places, but isn't set inside SafeRender
+    @host = @allowed_vars[:host] if @allowed_vars[:host].present?
+
     if Setting[:safemode_render]
       box = Safemode::Box.new self, @allowed_methods
       return box.eval(ERB.new(string, nil, '-').src, @allowed_vars)
@@ -36,6 +41,32 @@ class SafeRender
       @allowed_vars.each { |k,v| instance_variable_set "@#{k}", v }
       return ERB.new(string, nil, '-').result(binding)
     end
+  end
+
+  private
+
+  # These helpers are provided as convenience methods available to the writers of templates
+
+  # Calculates the media's path in relation to the domain and convert host to an IP
+  def install_path
+    @host.operatingsystem.interpolate_medium_vars(@host.operatingsystem.media_path(@host.medium, @host.domain), @host.architecture.name, @host.operatingsystem)
+  end
+
+  # Calculates the jumpstart path in relation to the domain and convert host to an IP
+  def jumpstart_path
+    @host.operatingsystem.jumpstart_path medium, @host.domain
+  end
+
+  def multiboot
+    @host.operatingsystem.pxe_prefix(@host.architecture) + "-multiboot"
+  end
+
+  def miniroot
+    @host.operatingsystem.initrd(@host.architecture)
+  end
+
+  def media_path
+    @host.operatingsystem.medium_uri(@host)
   end
 
 end
