@@ -1,6 +1,5 @@
 class ConfigTemplatesController < ApplicationController
   include Foreman::Controller::AutoCompleteSearch
-  include Foreman::Renderer
 
   before_filter :find_by_id, :only => [:show, :edit, :update, :destroy]
   before_filter :load_history, :only => :edit

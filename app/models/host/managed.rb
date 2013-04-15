@@ -160,7 +160,6 @@ class Host::Managed < Host::Base
 
   if SETTINGS[:unattended]
     # handles all orchestration of smart proxies.
-    include Foreman::Renderer
     include Orchestration
     include Orchestration::DHCP
     include Orchestration::DNS
@@ -168,7 +167,7 @@ class Host::Managed < Host::Base
     include Orchestration::TFTP
     include Orchestration::Puppetca
     include Orchestration::SSHProvision
-    include HostTemplateHelpers
+    include UnattendedHelper
 
     validates_uniqueness_of  :ip, :if => Proc.new {|host| host.require_ip_validation?}
     validates_uniqueness_of  :mac, :unless => Proc.new { |host| host.compute? or !host.managed }
@@ -267,7 +266,15 @@ class Host::Managed < Host::Base
   # returns the host correct disk layout, custom or common
   def diskLayout
     @host = self
-    pxe_render((disk.empty? ? ptable.layout : disk).gsub("\r",""))
+    template = (disk.empty? ? ptable.layout : disk).gsub("\r","")
+    methods   = [ :foreman_url, :grub_pass, :snippet, :snippets,
+      :ks_console, :root_pass, :multiboot, :jumpstart_path, :install_path,
+      :miniroot, :media_path ]
+    variables = {:arch => @arch, :host => @host, :osver => @osver,
+      :mediapath => @mediapath, :static => @static, :yumrepo => @yumrepo,
+      :dynamic => @dynamic, :epel => @epel, :kernel => @kernel, :initrd => @initrd,
+      :preseed_server => @preseed_server, :preseed_path => @preseed_path }
+    SafeRender.new(:methods => methods, :variables => variables).parse_string template
   end
 
   # returns a configuration template (such as kickstart) to a given host
@@ -336,7 +343,7 @@ class Host::Managed < Host::Base
     param.update self.params
 
     # Parse ERB values contained in the parameters
-    s=SafeRender.new(:variables => { :host => self} )
+    s=SafeRender.new(:methods => [], :variables => { :host => self} )
     param.each { |k,v| param[k] = s.parse(v) }
 
     classes = if Setting[:Parametrized_Classes_in_ENC] && Setting[:Enable_Smart_Variables_in_ENC]

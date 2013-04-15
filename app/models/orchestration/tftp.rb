@@ -78,10 +78,19 @@ module Orchestration::TFTP
       @initrd = os.initrd(arch)
       # work around for ensuring that people can use @host as well, as tftp templates were usually confusing.
       @host = self
+      methods   = [ :foreman_url, :grub_pass, :snippet, :snippets,
+        :ks_console, :root_pass, :multiboot, :jumpstart_path, :install_path,
+        :miniroot, :media_path ]
+      variables = {:arch => @arch, :host => @host, :osver => @osver,
+        :mediapath => @mediapath, :static => @static, :yumrepo => @yumrepo,
+        :dynamic => @dynamic, :epel => @epel, :kernel => @kernel, :initrd => @initrd,
+        :preseed_server => @preseed_server, :preseed_path => @preseed_path }
       if build?
-        pxe_render configTemplate({:kind => os.template_kind}).template
+        template = configTemplate({:kind => os.template_kind}).template
+        SafeRender.new(:methods => methods, :variables => variables).parse_string template
       else
-        pxe_render ConfigTemplate.find_by_name("PXE Localboot Default").template
+        template = ConfigTemplate.find_by_name("PXE Localboot Default").template
+        SafeRender.new(:methods => methods, :variables => variables).parse_string template
       end
     rescue => e
       failure _("Failed to generate %{template_kind} template: %{e}") % { :template_kind => os.template_kind, :e => e }
