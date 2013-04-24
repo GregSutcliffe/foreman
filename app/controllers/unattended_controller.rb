@@ -1,4 +1,5 @@
 class UnattendedController < ApplicationController
+  include DefaultSafeRender
   layout false
 
   # Methods which return configuration files for syslinux(pxe), pxegrub or g/ipxe
@@ -246,14 +247,7 @@ class UnattendedController < ApplicationController
     end
 
     begin
-      methods   = [ :foreman_url, :grub_pass, :snippet, :snippets,
-        :ks_console, :root_pass, :multiboot, :jumpstart_path, :install_path,
-        :miniroot, :media_path ]
-      variables = {:arch => @arch, :host => @host, :osver => @osver,
-        :mediapath => @mediapath, :static => @static, :yumrepo => @yumrepo,
-        :dynamic => @dynamic, :epel => @epel, :kernel => @kernel, :initrd => @initrd,
-        :preseed_server => @preseed_server, :preseed_path => @preseed_path }
-      @template = SafeRender.new(:methods => methods, :variables => variables).parse_string @unsafe_template
+      @template = default_safe_render(@unsafe_template)
       render :inline => "<%= @template.html_safe %>" and return
     rescue Exception => exc
       msg = _("There was an error rendering the %s template: ") % (template_name)

@@ -2,6 +2,7 @@ class Host::Managed < Host::Base
   include Authorization
   include ReportCommon
   include Hostext::Search
+  include DefaultSafeRender
 
   has_many :host_classes, :dependent => :destroy, :foreign_key => :host_id
   has_many :puppetclasses, :through => :host_classes
@@ -267,14 +268,7 @@ class Host::Managed < Host::Base
   def diskLayout
     @host = self
     template = (disk.empty? ? ptable.layout : disk).gsub("\r","")
-    methods   = [ :foreman_url, :grub_pass, :snippet, :snippets,
-      :ks_console, :root_pass, :multiboot, :jumpstart_path, :install_path,
-      :miniroot, :media_path ]
-    variables = {:arch => @arch, :host => @host, :osver => @osver,
-      :mediapath => @mediapath, :static => @static, :yumrepo => @yumrepo,
-      :dynamic => @dynamic, :epel => @epel, :kernel => @kernel, :initrd => @initrd,
-      :preseed_server => @preseed_server, :preseed_path => @preseed_path }
-    SafeRender.new(:methods => methods, :variables => variables).parse_string template
+    default_safe_render(template)
   end
 
   # returns a configuration template (such as kickstart) to a given host
