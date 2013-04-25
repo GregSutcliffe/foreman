@@ -1,4 +1,8 @@
 module UnattendedHelper
+  def self.included(base)
+    base.send :include, DefaultSafeRender
+    base.class_eval { protected :default_safe_render }
+  end
 
   def ks_console
     (@port and @baud) ? "console=ttyS#{@port},#{@baud}": ""
@@ -33,14 +37,7 @@ module UnattendedHelper
     if (template = ConfigTemplate.where(:name => name, :snippet => true).first)
       Rails.logger.debug "rendering snippet #{template.name}"
       begin
-        methods   = [ :foreman_url, :grub_pass, :snippet, :snippets,
-          :ks_console, :root_pass, :multiboot, :jumpstart_path, :install_path,
-          :miniroot, :media_path ]
-        variables = {:arch => @arch, :host => @host, :osver => @osver,
-          :mediapath => @mediapath, :static => @static, :yumrepo => @yumrepo,
-          :dynamic => @dynamic, :epel => @epel, :kernel => @kernel, :initrd => @initrd,
-          :preseed_server => @preseed_server, :preseed_path => @preseed_path }
-        return SafeRender.new(:methods => methods, :variables => variables).parse_string template.template
+        return default_safe_render(template.template)
       rescue Exception => exc
         raise "The snippet '#{name}' threw an error: #{exc}"
       end
