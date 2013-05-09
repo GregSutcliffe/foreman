@@ -67,7 +67,7 @@ class ConfigTemplatesController < ApplicationController
   end
 
   def build_pxe_default
-    status, msg = ConfigTemplate.build_pxe_default(self)
+    status, msg = ConfigTemplate.build_pxe_default
 
     respond_to do |format|
       format.html do

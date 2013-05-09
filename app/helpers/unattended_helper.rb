@@ -39,10 +39,10 @@ module UnattendedHelper
       begin
         return default_safe_render(template.template)
       rescue Exception => exc
-        raise "The snippet '#{name}' threw an error: #{exc}"
+        raise Foreman::Exception.new("The snippet '%{name}' threw an error: %{e}", { :name => name, :e => exc })
       end
     else
-      raise "The specified snippet '#{name}' does not exist, or is not a snippet."
+      raise Foreman::Exception.new("The specified snippet '%{name}' does not exist, or is not a snippet.", {:name => name})
     end
   end
 

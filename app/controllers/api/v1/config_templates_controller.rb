@@ -74,7 +74,7 @@ module Api
       api :GET, "/config_templates/build_pxe_default", "Change the default PXE menu on all configured TFTP servers"
 
       def build_pxe_default
-        status, msg = ConfigTemplate.build_pxe_default(self)
+        status, msg = ConfigTemplate.build_pxe_default
         render :json => msg, :status => status
       end
 
