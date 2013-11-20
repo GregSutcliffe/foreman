@@ -1,0 +1,17 @@
+<% title(_("Imagify %s") % @hostgroup.label) %>
+
+<%= form_for @hostgroup, :url => imagify_update_hostgroup_path(:id => @hostgroup.id) do |f| %>
+  <%= fields_for "cr" do |cr| %>
+    <%= select_f cr, :id, @valid_crs, :id, :to_label, {}, :label => _("CR to create Image on") %>
+  <% end %>
+
+  <%= fields_for "template" do |tmpl| %>
+    <%= select_f tmpl, :tmpl_id, @templates, :id, :name, {}, :label => _("Script to run on new image") %>
+  <% end %>
+
+  <%= fields_for "vm", @vm do |vm| %>
+    <%= render "compute_resources_vms/form/#{@compute_resource.provider.downcase}", :f => vm, :compute_resource => @compute_resource %>
+  <% end %>
+
+  <%= submit_tag(_("Create Base Image").html_safe, :class => "btn btn-primary", :disable_with => _("Please wait...")) %>
+<% end %>

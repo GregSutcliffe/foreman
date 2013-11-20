@@ -1,8 +1,9 @@
 class HostgroupsController < ApplicationController
   include Foreman::Controller::HostDetails
   include Foreman::Controller::AutoCompleteSearch
+  include Foreman::Renderer
 
-  before_filter :find_hostgroup, :only => [:edit, :update, :destroy, :clone]
+  before_filter :find_hostgroup, :only => [:edit, :update, :destroy, :clone, :imagify, :imagify_update]
 
   def index
     begin
@@ -118,6 +119,49 @@ class HostgroupsController < ApplicationController
   def taxonomy_scope
     @organization = Organization.current if SETTINGS[:organizations_enabled]
     @location     = Location.current     if SETTINGS[:locations_enabled]
+  end
+
+  def imagify
+    @valid_crs = ComputeResource.where(:type => "Foreman::Model::Openstack")
+    @compute_resource = @valid_crs.first
+    @vm = @compute_resource.new_vm
+    @vm.name = "#{@hostgroup.name}_2111131253"
+    @templates = ConfigTemplate.joins(:operatingsystems, :template_kind).where('operatingsystems.id' => @hostgroup.operatingsystem.id, 'template_kinds.name' => 'imagify')
+  end
+
+  def imagify_update
+    @compute_resource = ComputeResource.find(params[:cr][:id])
+    vm = @compute_resource.create_vm params[:vm]
+    if vm.present?
+      # This mostly copied from openstack.rb, ssh_provision.rb and provision/ssh.rb
+      ip = vm.floating_ip_address
+      image = Image.find_by_uuid(params[:vm][:image_ref])
+      credentials = { :key_data => [@compute_resource.key_pair.secret] }
+      template_file = unattended_render_to_temp_file(ConfigTemplate.find(params[:template][:tmpl_id]).template, @hostgroup.id.to_s)
+
+      client = Foreman::Provision::SSH.new ip, image.username, { :template => template_file.path }.merge(credentials)
+
+      if client.deploy!
+        # Built the image, so snapshot it, and get the response from Fog
+        excon = vm.create_image("Foreman Hostgroup #{@hostgroup.name} Image")
+        if excon.data[:body]['image']['id'].present?
+          # Create a new Image in Foreman that links to it
+          image2 = Image.new(:name          => @hostgroup.name,
+                          :compute_resource => @compute_resource,
+                          :operatingsystem  => image.operatingsystem,
+                          :architecture     => image.architecture,
+                          :username         => image.username,
+                          :uuid             => excon.data[:body]['image']['id']
+                         )
+          if image2.save
+            @compute_resource.destroy_vm vm.id
+            process_success :success_msg => "Image created for #{@hostgroup.name}", :success_redirect => hostgroups_path
+          else
+            process_error :error_msg => 'Image assocation failed!', :object => @hostgroup, :redirect => hostgroups_path
+          end
+        end
+      end
+    end
   end
 
   private
