@@ -19,6 +19,7 @@ Foreman::Application.routes.draw do
         get 'externalNodes'
         get 'setBuild'
         get 'cancelBuild'
+        get 'imagify'
         get 'puppetrun'
         get 'pxe_config'
         put 'toggle_manage'

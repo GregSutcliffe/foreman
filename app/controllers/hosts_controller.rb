@@ -3,6 +3,7 @@ class HostsController < ApplicationController
   include Foreman::Controller::AutoCompleteSearch
   include Foreman::Controller::TaxonomyMultiple
   include Foreman::Controller::SmartProxyAuth
+  include Foreman::Renderer
 
   PUPPETMASTER_ACTIONS=[ :externalNodes, :lookup ]
   SEARCHABLE_ACTIONS= %w[index active errors out_of_sync pending disabled ]
@@ -17,10 +18,49 @@ class HostsController < ApplicationController
     :update_multiple_environment, :submit_multiple_build, :submit_multiple_destroy, :update_multiple_puppetrun,
     :multiple_puppetrun]
   before_filter :find_by_name, :only => %w[show edit update destroy puppetrun setBuild cancelBuild
-    storeconfig_klasses clone pxe_config toggle_manage power console bmc ipmi_boot]
+    storeconfig_klasses clone pxe_config toggle_manage power console bmc ipmi_boot imagify]
   before_filter :taxonomy_scope, :only => [:new, :edit] + AJAX_REQUESTS
   before_filter :set_host_type, :only => [:update]
   helper :hosts, :reports
+
+  def imagify
+    if @host.present?
+      @compute_resource = @host.compute_resource
+      @hostgroup = @host.hostgroup
+
+      # This mostly copied from openstack.rb, ssh_provision.rb and provision/ssh.rb
+      vm = @host.compute_object
+      ip = vm.floating_ip_address
+      image = @host.image
+      credentials = { :key_data => [@compute_resource.key_pair.secret] }
+      template_file = unattended_render_to_temp_file(ConfigTemplate.find_by_name('Imagify').template, @hostgroup.id.to_s)
+      client = Foreman::Provision::SSH.new ip, image.username, { :template => template_file.path }.merge(credentials)
+
+      # we have a puppet cert already, thanks to this being a built host
+      # Just need to ensure the template has "puppet agent -tv" inside to get a full run
+      if client.deploy!
+        # Built the image, so snapshot it, and get the response from Fog
+        excon = vm.create_image("Foreman Hostgroup #{@hostgroup.name} Image")
+        if excon.data[:body]['image']['id'].present?
+          # Create a new Image in Foreman that links to it
+          image2 = Image.new(:name          => @hostgroup.name,
+                          :compute_resource => @compute_resource,
+                          :operatingsystem  => image.operatingsystem,
+                          :architecture     => image.architecture,
+                          :username         => image.username,
+                          :uuid             => excon.data[:body]['image']['id']
+                         )
+          if image2.save
+            #@compute_resource.destroy_vm vm.id
+            process_success :success_msg => "Image created for #{@hostgroup.name}", :success_redirect => hostgroups_path
+          else
+            process_error :error_msg => 'Image assocation failed!', :object => @hostgroup, :redirect => hostgroups_path
+          end
+        end
+      end
+    end
+  end
+
 
   def index (title = nil)
     begin

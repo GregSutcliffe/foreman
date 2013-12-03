@@ -226,6 +226,7 @@ module HostsHelper
   def host_title_actions(host, vm)
     title_actions(
         button_group(
+            link_to_if_authorized(_('Imagify'), hash_for_imagify_host_path(:id => host), :title => _("Convert to Openstack Image")),
             link_to_if_authorized(_("Edit"), hash_for_edit_host_path(:id => host), :title => _("Edit your host")),
             if host.build
               link_to_if_authorized(_("Cancel Build"), hash_for_cancelBuild_host_path(:id => host), :disabled => host.can_be_built?,
