@@ -212,10 +212,13 @@ module HostsHelper
     fields
   end
 
-  def possible_images cr, arch = nil, os = nil
+  def possible_images cr, arch = nil, os = nil, hg = nil
     return cr.images unless controller_name == "hosts"
     return [] unless arch && os
-    cr.images.where(:architecture_id => arch, :operatingsystem_id => os)
+
+    conditions = { :architecture_id => arch, :operatingsystem_id => os }
+    conditions[:hostgroup_id] = hg if hg
+    cr.images.where(conditions)
   end
 
   def state s

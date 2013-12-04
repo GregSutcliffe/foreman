@@ -136,5 +136,10 @@ module Host
         comparison_object.id == id
     end
 
+    def snapshot!
+      return false if compute_resource_id.nil? or !compute_resource.capabilities.include?(:image)
+      Snapshot.new(:host => self).create
+    end
+
   end
 end

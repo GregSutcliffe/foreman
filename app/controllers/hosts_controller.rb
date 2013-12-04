@@ -17,7 +17,7 @@ class HostsController < ApplicationController
     :update_multiple_environment, :submit_multiple_build, :submit_multiple_destroy, :update_multiple_puppetrun,
     :multiple_puppetrun]
   before_filter :find_by_name, :only => %w[show edit update destroy puppetrun setBuild cancelBuild
-    storeconfig_klasses clone pxe_config toggle_manage power console bmc ipmi_boot]
+    storeconfig_klasses clone pxe_config toggle_manage power console bmc ipmi_boot snapshot]
   before_filter :taxonomy_scope, :only => [:new, :edit] + AJAX_REQUESTS
   before_filter :set_host_type, :only => [:update]
   helper :hosts, :reports
@@ -481,6 +481,14 @@ class HostsController < ApplicationController
     render :partial => "provisioning", :locals => {:templates => templates}
   end
 
+  def snapshot
+   if @host.snapshot!
+     process_success :success_msg => "Snapshot created for #{@host}"
+   else
+     process_error :error_msg => 'Snapshot creation failed!'
+   end
+
+  end
   private
 
   def refresh_host

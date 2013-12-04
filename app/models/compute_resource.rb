@@ -137,6 +137,10 @@ class ComputeResource < ActiveRecord::Base
     true
   end
 
+  def snapshot_vm uuid, title = nil
+   raise _("Not implemented for this provider")
+  end
+
   def provider
     read_attribute(:type).to_s.gsub("#{STI_PREFIX}::","")
   end

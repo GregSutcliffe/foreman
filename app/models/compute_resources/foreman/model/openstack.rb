@@ -73,6 +73,14 @@ module Foreman::Model
       true
     end
 
+    def snapshot_vm uuid, title = nil
+      vm = find_vm_by_uuid(uuid)
+      snapshot = vm.create_image(title)
+      return false unless snapshot.data[:body]['image']['id'].present?
+      # todo, this should return a volume object
+      snapshot[:body]['image']['id']
+    end
+
     def console(uuid)
       vm = find_vm_by_uuid(uuid)
       vm.console.body.merge({'timestamp' => Time.now.utc})

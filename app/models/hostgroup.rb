@@ -23,6 +23,7 @@ class Hostgroup < ActiveRecord::Base
   alias_attribute :os, :operatingsystem
   audited :except => [:label], :allow_mass_assignment => true
   has_many :trends, :as => :trendable, :class_name => "ForemanTrend"
+  has_many :images
   # attribute used by *_names and *_name methods.  default is :name
   attr_name :label
 

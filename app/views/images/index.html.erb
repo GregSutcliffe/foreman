@@ -7,6 +7,7 @@
   <tr>
     <th><%= _("Image|Name") %></th>
     <th><%= _("Operating System") %></th>
+    <th><%= _("Hostgroup") %></th>
     <th><%= _("Image|Username") %></th>
     <th><%= _("Image|Uuid") %></th>
     <th></th>
@@ -16,6 +17,7 @@
   <tr>
     <td><%= image.name %></td>
     <td><%= image.operatingsystem %></td>
+    <td><%= image.hostgroup.try(:label) %></td>
     <td><%= image.username %></td>
     <td><%= image.uuid %></td>
     <td><%= action_buttons(link_to(_('Edit'), edit_compute_resource_image_path(@compute_resource, image)),

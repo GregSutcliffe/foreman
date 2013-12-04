@@ -27,6 +27,7 @@ Foreman::Application.routes.draw do
         get 'console'
         get 'bmc'
         put 'ipmi_boot'
+        get 'snapshot'
       end
       collection do
         get 'multiple_actions'
