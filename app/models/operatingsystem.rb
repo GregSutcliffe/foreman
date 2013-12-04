@@ -37,6 +37,7 @@ class Operatingsystem < ActiveRecord::Base
   scoped_search :on => :name, :complete_value => :true
   scoped_search :on => :major, :complete_value => :true
   scoped_search :on => :minor, :complete_value => :true
+  scoped_search :on => :description, :complete_value => :true
   scoped_search :on => :type, :complete_value => :true, :rename => "family"
 
   scoped_search :in => :architectures,    :on => :name, :complete_value => :true, :rename => "architecture"
@@ -111,7 +112,7 @@ class Operatingsystem < ActiveRecord::Base
 
   # The OS is usually represented as the concatenation of the OS and the revision
   def to_label
-    "#{name} #{release}"
+    short_description
   end
 
   def release
@@ -119,11 +120,11 @@ class Operatingsystem < ActiveRecord::Base
   end
 
   def to_s
-    to_label
+    "#{name} #{release}"
   end
 
   def fullname
-    to_label
+    to_s
   end
 
   def self.find_by_fullname(fullname)
@@ -192,9 +193,16 @@ class Operatingsystem < ActiveRecord::Base
     false
   end
 
+  def short_description
+    # This method should be overridden in the OS subclass
+    # to handle shortening the specific formats of lsbdistdescription
+    # returned by Facter on that OS
+    description.blank? ? to_s : description
+  end
+
   private
   def deduce_family
-    family ||= self.class.families.find do |f|
+    self.family ||= self.class.families.find do |f|
       name =~ FAMILIES[f]
     end
   end

@@ -37,6 +37,16 @@ class Debian < Operatingsystem
     true
   end
 
+  def short_description
+    return to_s if description.blank?
+    s=description
+    s.gsub!('GNU/Linux','')
+    s.gsub!(/\(.+?\)/,'')
+    s.squeeze! " "
+    s.strip!
+    s.blank? ? description : s
+  end
+
   private
 
   # tries to guess if this an ubuntu or a debian os

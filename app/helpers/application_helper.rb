@@ -4,7 +4,7 @@ module ApplicationHelper
 
   protected
   def contract model
-    model.to_s
+    model.class == Operatingsystem ? model.to_label : model.to_s
   end
 
   def show_habtm associations
