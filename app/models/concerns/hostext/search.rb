@@ -43,7 +43,7 @@ module Hostext
         scoped_search :on => :uuid,                             :complete_value => true
         scoped_search :on => :build,                            :complete_value => {:true => true, :false => false}
         scoped_search :on => :installed_at,                     :complete_value => true, :only_explicit => true
-        scoped_search :in => :operatingsystem, :on => :name,    :complete_value => true, :rename => :os
+        scoped_search :in => :operatingsystem, :on => :name,    :complete_value => true, :rename => :os, :ext_method => :search_by_os_name
         scoped_search :in => :operatingsystem, :on => :major,   :complete_value => true, :rename => :os_major
         scoped_search :in => :operatingsystem, :on => :minor,   :complete_value => true, :rename => :os_minor
       end
@@ -66,6 +66,12 @@ module Hostext
         opts  = hosts.empty? ? "< 0" : "IN (#{hosts.map(&:id).join(',')})"
 
         return {:conditions => " hosts.id #{opts} " }
+      end
+
+      def search_by_os_name(key, operator, value)
+        value = "RedHat" if value == "RHEL"
+        conditions  = sanitize_sql_for_conditions(["operatingsystems.name #{operator} ?", value_to_sql(operator, value)])
+        return {:conditions => conditions}
       end
 
       def search_by_puppetclass(key, operator, value)
