@@ -25,14 +25,17 @@ class Snapshot
       title = "Foreman Hostgroup #{hostgroup.label} Image"
       snapshot = compute_resource.snapshot_vm(host.uuid, title)
       raise "failed to snapshot #{snapshot}" unless snapshot
+      wait_for_active(snapshot)
       # Create a new Image in Foreman that links to it
-      Image.create(:name                => name,
-                   :compute_resource_id => compute_resource.id,
-                   :operatingsystem_id  => image.operatingsystem_id,
-                   :architecture_id     => image.architecture_id,
-                   :hostgroup_id        => hostgroup.id,
-                   :username            => image.username,
-                   :uuid                => snapshot)
+      Image.find_or_create_by_name(
+        :name                => name,
+        :compute_resource_id => compute_resource.id,
+        :operatingsystem_id  => image.operatingsystem_id,
+        :architecture_id     => image.architecture_id,
+        :hostgroup_id        => hostgroup.id,
+        :username            => image.username,
+        :uuid                => snapshot
+      )
     end
   ensure
     template.unlink
@@ -54,6 +57,13 @@ class Snapshot
 
   def template_file
     unattended_render_to_temp_file(cleanup_template, hostgroup.id.to_s)
+  end
+
+  def wait_for_active id
+    # We can't delete the underlying Host until the image has finished saving
+    until compute_resource.snapshot_status(id) == "ACTIVE"
+      sleep 1
+    end
   end
 
 end

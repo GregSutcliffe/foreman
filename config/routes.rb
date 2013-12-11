@@ -123,6 +123,7 @@ Foreman::Application.routes.draw do
   resources :hostgroups, :except => [:show] do
     member do
       get 'nest'
+      get 'snapshot'
       get 'clone'
     end
     collection do

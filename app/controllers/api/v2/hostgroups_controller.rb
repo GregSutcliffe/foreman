@@ -5,7 +5,7 @@ module Api
       include Api::Version2
       include Api::TaxonomyScope
 
-      before_filter :find_resource, :only => %w{show update destroy}
+      before_filter :find_resource, :only => %w{show update destroy snapshot}
 
       api :GET, "/hostgroups/", "List all hostgroups."
       param :search, String, :desc => "filter results"
@@ -69,6 +69,46 @@ module Api
 
       def destroy
         process_response @hostgroup.destroy
+      end
+
+      api :GET, "/hostgroups/:id/snapshot", "Snapshot a hostgroup."
+      param :id, :identifier, :required => true
+      param :host, Hash do
+        param :name,                String
+        param :compute_resource_id, :number
+        param :hostgroup_id,        :number
+        param :build,               :bool
+        param :managed,             :bool
+        param :compute_attributes, Hash do
+          param :flavor_ref, :number
+          param :network,    String
+          param :image_ref,  String
+        end
+      end
+
+      def snapshot
+        render :json => "should not be here, foreman-tasks/dynflow should intercept this!"
+        return
+
+        # This code is kept for reference while working on Foreman-Tasks
+
+        #hash = HashWithIndifferentAccess.new({
+        #  :name                => @hostgroup.name.downcase,
+        #  :compute_resource_id => ComputeResource.first.id,
+        #  :hostgroup_id        => @hostgroup.id,
+        #  :build               => 1,
+        #  :managed             => true,
+        #  :compute_attributes  => {
+        #    :flavor_ref          => 1,
+        #    :network             => "public",
+        #    :image_ref           => ComputeResource.first.images.first.uuid
+        #  }
+        #})
+        #hash.merge!(params[:host]) if params[:host].present?
+        #progress_id = "hg_imaging_#{@hostgroup.id}"
+        #Hostgroup.delay.snapshot!(@hostgroup.id,User.current.id,progress_id,hash)
+        #process_response true
+
       end
 
     end

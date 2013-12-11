@@ -120,6 +120,10 @@ class HostgroupsController < ApplicationController
     @location     = Location.current     if SETTINGS[:locations_enabled]
   end
 
+  def snapshot
+    flash[:success] = "Not implemented in UI, try the API"
+  end
+
   private
 
   def find_hostgroup

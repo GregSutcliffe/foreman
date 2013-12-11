@@ -81,6 +81,10 @@ module Foreman::Model
       snapshot[:body]['image']['id']
     end
 
+    def snapshot_status uuid
+      available_images.find {|i| i.id == uuid}.status
+    end
+
     def console(uuid)
       vm = find_vm_by_uuid(uuid)
       vm.console.body.merge({'timestamp' => Time.now.utc})

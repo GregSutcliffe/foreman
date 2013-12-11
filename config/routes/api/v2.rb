@@ -47,6 +47,9 @@ Foreman::Application.routes.draw do
       resources :fact_values, :only => [:index]
 
       resources :hostgroups, :except => [:new, :edit] do
+        member do
+          post 'snapshot'
+        end
         (resources :locations, :only => [:index, :show]) if SETTINGS[:locations_enabled]
         (resources :organizations, :only => [:index, :show]) if SETTINGS[:organizations_enabled]
         resources :parameters, :except => [:new, :edit] do
