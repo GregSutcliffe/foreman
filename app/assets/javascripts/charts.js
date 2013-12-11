@@ -218,9 +218,8 @@ function search_on_click(event, item) {
     link = $(event.currentTarget).parents('.stats-well').find(selector).next('a').attr('href')
   } else {
     if (link.indexOf("~VAL2~") != -1) {
-      var strSplit = item.series.label.split(" ");
-      var val1 = strSplit[0];
-      var val2 = strSplit[1];
+      var val1 = item.series.label.split(/\s\d+/)[0];
+      var val2 = item.series.label.split(/\D+\s/)[1];
       link = link.replace("~VAL2~", val2);
     } else {
       var val1 = item.series.label;
