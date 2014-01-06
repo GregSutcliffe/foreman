@@ -145,7 +145,7 @@ class Hostgroup < ActiveRecord::Base
     # need to search without the domain
     return true unless Host.where("name LIKE ?","#{host_hash[:name]}%").empty?
 
-    if @host=Host::Managed.create!(host_hash)
+    if @host=Host::Hidden.create!(host_hash)
       @host.snapshot!
       raise unless @host.destroy
     end

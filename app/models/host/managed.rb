@@ -52,13 +52,15 @@ class Host::Managed < Host::Base
   attr_reader :cached_host_params
 
   default_scope lambda {
-      org = Organization.current
-      loc = Location.current
-      conditions = {}
-      conditions[:organization_id] = Array.wrap(org).map(&:id) if org
-      conditions[:location_id]     = Array.wrap(loc).map(&:id) if loc
-      where(conditions)
-    }
+    org = Organization.current
+    loc = Location.current
+    conditions = {}
+    conditions[:organization_id] = Array.wrap(org).map(&:id) if org
+    conditions[:location_id]     = Array.wrap(loc).map(&:id) if loc
+    # Need to exclude Host::Hidden manually, as otherwise it'll be shown
+    # because Hidden inherits from Managed. There's probably a neater way to do this...
+    where(conditions).where(['type <> ?', 'Host::Hidden'])
+  }
 
   scope :recent,      lambda { |*args| {:conditions => ["last_report > ?", (args.first || (Setting[:puppet_interval] + 5).minutes.ago)]} }
   scope :out_of_sync, lambda { |*args| {:conditions => ["last_report < ? and enabled != ?", (args.first || (Setting[:puppet_interval] + 5).minutes.ago), false]} }
