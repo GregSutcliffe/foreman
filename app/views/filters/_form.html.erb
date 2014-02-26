@@ -43,10 +43,9 @@
         <%= checkbox_f f, :unlimited?,
                        :help_inline => _("By unchecking this you can specify filter using Foreman search syntax in search field. If filter remains unlimited (this field is checked) it applies on all resources of the selected type") %>
 
-        <% path = f.object.resource_type.present? ? send("#{f.object.resource_type.pluralize.underscore}_path") : '' %>
         <%= autocomplete_f f, :search,
                            :disabled => f.object.unlimited?,
-                           :path => path, :control_group_id => 'search_group' %>
+                           :path => search_path(f.object.resource_type), :control_group_id => 'search_group' %>
       </div>
     </div>
 
