@@ -12,18 +12,21 @@ class DhcpOrchestrationTest < ActiveSupport::TestCase
     SETTINGS[:organizations_enabled] = true
   end
 
-  def test_host_should_have_dhcp
+  test 'host_should_have_dhcp' do
     if unattended?
-      h = hosts(:one)
+      h = FactoryGirl.create(:host, :managed,
+                             :puppet_proxy => smart_proxies(:puppetmaster),
+                             :compute_resource => compute_resources(:one),
+                             :subnet => subnets(:one))
       assert h.valid?
-      assert h.dhcp?
+      assert h.dhcp?, 'host.dhcp? does not return true'
       assert_instance_of Net::DHCP::Record, h.dhcp_record
     end
   end
 
-  def test_host_should_not_have_dhcp
+  test 'host_should_not_have_dhcp' do
     if unattended?
-      h = hosts(:minimal)
+      h = FactoryGirl.create(:host)
       assert h.valid?
       assert_equal false, h.dhcp?
     end

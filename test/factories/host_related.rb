@@ -1,6 +1,7 @@
 FactoryGirl.define do
   factory :host do
     sequence(:name) { |n| "host#{n}" }
+    sequence(:hostname) { |n| "host#{n}" }
     sequence(:ip) { |n| IPAddr.new(n, Socket::AF_INET).to_s }
     sequence(:mac) { |n| "01:23:45:67:89:" + ("%02x" % "#{n%256}") }
     domain
@@ -58,6 +59,10 @@ FactoryGirl.define do
 
     trait :with_operatingsystem do
       operatingsystem
+    end
+
+    trait :managed do
+      managed true
     end
 
   end
