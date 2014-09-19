@@ -36,6 +36,7 @@ solaris10:
   media: solaris10
   architectures: sparc
   release_name: hw0910
+  ptables: one
 
 suse:
   name: OpenSuse

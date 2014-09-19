@@ -4,6 +4,7 @@ FactoryGirl.define do
     sequence(:hostname) { |n| "host#{n}" }
     sequence(:ip) { |n| IPAddr.new(n, Socket::AF_INET).to_s }
     sequence(:mac) { |n| "01:23:45:67:89:" + ("%02x" % "#{n%256}") }
+    root_pass 'xybxa6JUkz63w'
     domain
     environment
 
@@ -65,6 +66,19 @@ FactoryGirl.define do
       managed true
     end
 
+    trait :with_dhcp_orchestration do
+      managed true
+      architecture
+      association :compute_resource, :factory => :libvirt_cr
+      ptable
+      operatingsystem { FactoryGirl.create(:operatingsystem, :architectures => [architecture], :ptables => [ptable]) }
+      subnet { FactoryGirl.create(:subnet,
+                                  :dhcp => FactoryGirl.create(:smart_proxy,
+
+                                                              :features => [FactoryGirl.create(:feature, :dhcp)])) }
+      ip { subnet.network.sub(/0\Z/, '1') }
+    end
+
   end
 
   factory :hostgroup do
@@ -94,6 +108,12 @@ FactoryGirl.define do
       subnet
     end
   end
+
+  factory :ptable do
+    sequence(:name) { |n| "ptable#{n}" }
+    layout 'zerombr yes\nclearpart --all    --initlabel\npart /boot --fstype ext3 --size=<%= 10 * 10 %> --asprimary\npart /     --f   stype ext3 --size=1024 --grow\npart swap  --recommended'
+  end
+
 
   factory :parameter do
     sequence(:name) { |n| "parameter#{n}" }
