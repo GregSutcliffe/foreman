@@ -2,7 +2,7 @@ require 'test_helper'
 
 class FactValueTest < ActiveSupport::TestCase
   def setup
-    @host = hosts(:one)
+    @host = FactoryGirl.create(:host)
     @fact_name   = FactName.create(:name => "my_facting_name")
     @fact_value  = FactValue.create(:value => "some value", :host => @host, :fact_name => @fact_name)
     @child_name  = FactName.create(:name => 'my_facting_name::child', :parent => @fact_name)
@@ -15,7 +15,7 @@ class FactValueTest < ActiveSupport::TestCase
     assert_equal h, FactValue.count_each("my_facting_name")
 
     #Now creating a new fact value
-    @other_host = hosts(:two)
+    @other_host = FactoryGirl.create(:host)
     other_fact_value = FactValue.create(:value => "some value", :host => @other_host, :fact_name => @fact_name)
     h = [{:label=>"some value", :data=>2}]
     assert_equal h, FactValue.count_each("my_facting_name")

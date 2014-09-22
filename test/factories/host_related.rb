@@ -74,8 +74,22 @@ FactoryGirl.define do
       operatingsystem { FactoryGirl.create(:operatingsystem, :architectures => [architecture], :ptables => [ptable]) }
       subnet { FactoryGirl.create(:subnet,
                                   :dhcp => FactoryGirl.create(:smart_proxy,
-
                                                               :features => [FactoryGirl.create(:feature, :dhcp)])) }
+      ip { subnet.network.sub(/0\Z/, '1') }
+    end
+
+    trait :with_dns_orchestration do
+      managed true
+      architecture
+      association :compute_resource, :factory => :libvirt_cr
+      ptable
+      operatingsystem { FactoryGirl.create(:operatingsystem, :architectures => [architecture], :ptables => [ptable]) }
+      subnet { FactoryGirl.create(:subnet,
+                                  :dns => FactoryGirl.create(:smart_proxy,
+                                                             :features => [FactoryGirl.create(:feature, :dns)])) }
+      domain { FactoryGirl.create(:domain,
+                                  :dns => FactoryGirl.create(:smart_proxy,
+                                                              :features => [FactoryGirl.create(:feature, :dns)]))}
       ip { subnet.network.sub(/0\Z/, '1') }
     end
 
