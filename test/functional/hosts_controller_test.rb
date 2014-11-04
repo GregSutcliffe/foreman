@@ -757,10 +757,11 @@ class HostsControllerTest < ActionController::TestCase
   end
 
   test "can change sti type to valid subtype" do
-    class Host::Valid < Host::Base; end
-    put :update, { :commit => "Update", :id => @host.name, :host => {:type => "Host::Valid"} }, set_session_user
-    @host = Host::Base.find(@host.id)
-    assert_equal "Host::Valid", @host.type
+    class Host::Valid < Host::Managed; end
+    host = FactoryGirl.create(:host)
+    put :update, { :commit => "Update", :id => host.name, :host => {:type => "Host::Valid"} }, set_session_user
+    host = Host::Base.find(host.id)
+    assert_equal "Host::Valid", host.type
   end
 
   test "cannot change sti type to invalid subtype" do

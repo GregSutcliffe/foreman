@@ -32,6 +32,7 @@ module HostTemplateHelpers
     protocol = config.scheme || 'http'
     port     = config.port || request.port
     host     = config.host || request.host
+    path     = config.path
 
     @host ||= self
     proxy = @host.try(:subnet).try(:tftp)
@@ -56,10 +57,11 @@ module HostTemplateHelpers
       host     = uri.host
       port     = uri.port
       protocol = uri.scheme
+      path     = config.path
     end
 
     url_for :only_path => false, :controller => "/unattended", :action => action,
-      :protocol  => protocol, :host => host, :port => port,
+      :protocol  => protocol, :host => host, :port => port, :script_name => path,
       :token     => (@host.token.value unless @host.token.nil?)
   end
 
