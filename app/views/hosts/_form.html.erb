@@ -27,7 +27,8 @@
     <div class="tab-content">
 
       <div class="tab-pane active" id="primary">
-        <%= text_f f, :name, :size => "col-md-8", :value => name_field(@host) %>
+        <%= text_f f, :name, :size => "col-md-5", :value => name_field(@host),
+            :help_inline => _("This value is used also as the host's primary interface name.") %>
 
         <% if show_organization_tab?  %>
           <%= select_f f, :organization_id, Organization.my_organizations, :id, :to_label,
@@ -76,6 +77,12 @@
         <%= select_f f, :environment_id, Environment.with_taxonomy_scope_override(@location,@organization).order(:name), :id, :to_label, { :include_blank => true },
             {:onchange => 'update_puppetclasses(this)', :'data-url' => hostgroup_or_environment_selected_hosts_path,
             :'data-host-id' => @host.id, :help_inline => :indicator} %>
+
+        <% if SETTINGS[:unattended] && @host.managed %>
+        <%= select_f f, :realm_id, Realm.with_taxonomy_scope_override(@location, @organization).authorized(:view_realms),
+                        :id, :to_label, { :include_blank => true }, {:help_inline => :indicator} %>
+        <% end %>
+
         <%= puppet_master_fields f %>
       </div>
 

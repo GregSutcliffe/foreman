@@ -518,9 +518,9 @@ $(document).on('change', '.interface_domain', function () {
   interface_domain_selected(this);
 });
 
-$(document).on('click', '#suggest_new_ip', function (e) {
-  $('#host_ip').val('')
-  interface_subnet_selected($('#host_subnet_id'));
+$(document).on('click', '.suggest_new_ip', function (e) {
+  $(this).closest('fieldset').find('.interface_ip').val('');
+  interface_subnet_selected($(this).closest('fieldset').find('.interface_subnet'));
   e.preventDefault();
 });
 
@@ -558,7 +558,7 @@ function interface_domain_selected(element) {
         subnet_options.append($("<option />").val(null).text(__('Please select')));
 
       $.each(result, function () {
-        subnet_options.append($("<option />").val(this.subnet.id).text(this.subnet.name + ' (' + this.subnet.to_label + ')'));
+        subnet_options.append($("<option />").val(this.subnet.id).text(this.subnet.to_label));
       });
       if (subnet_options.find('option').length > 0) {
         subnet_options.attr('disabled', false);
@@ -599,7 +599,7 @@ function interface_subnet_selected(element) {
       return;
     }
   }
-  var interface_mac = $(element).parentsUntil('.fields').parent().find('input[id$=_mac]')
+  var interface_mac = $(element).closest('fieldset').find('input[id$=_mac]');
   var url = $(element).attr('data-url');
   var org = $('#host_organization_id :selected').val();
   var loc = $('#host_location_id :selected').val();
