@@ -346,6 +346,15 @@ module HostsHelper
     status.html_safe
   end
 
+  def interface_flags(nic)
+    primary_class = nic.primary? ? "active" : ""
+    provision_class = nic.provision? ? "active" : ""
+
+    status = "<i class=\"glyphicon glyphicon glyphicon-tag primary-flag #{primary_class}\" title=\"#{_('Primary')}\"></i>"
+    status += "<i class=\"glyphicon glyphicon glyphicon-hdd provision-flag #{provision_class}\" title=\"#{_('Provisioning')}\"></i>"
+    status.html_safe
+  end
+
   def build_state(build)
     build.state ? 'warning' : 'danger'
   end

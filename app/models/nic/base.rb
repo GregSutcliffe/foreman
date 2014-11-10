@@ -16,6 +16,7 @@ module Nic
                     :_destroy # used for nested_attributes
 
     before_validation :normalize_mac
+    after_validation :set_validated
     before_destroy :not_required_interface
 
     validates :mac, :uniqueness => {:scope => :virtual}, :if => Proc.new { |nic| nic.host && nic.host.managed? && !nic.host.compute? && !nic.virtual? }
@@ -29,7 +30,7 @@ module Nic
 
     validate :exclusive_primary_interface
     validate :exclusive_provision_interface
-    validates :domain, :presence => true, :if => Proc.new { |nic| nic.host && nic.host.managed? && nic.primary? }
+    validates :domain_id, :presence => true, :if => Proc.new { |nic| nic.host && nic.host.managed? && nic.primary? }
     validates :ip, :presence => true, :if => Proc.new { |nic| nic.host && nic.host.managed? && nic.require_ip_validation? }
 
     scope :bootable, lambda { where(:type => "Nic::Bootable") }
@@ -95,6 +96,20 @@ module Nic
       result
     end
 
+    def shortname
+      domain.nil? ? name : name.chomp("." + domain.name)
+    end
+
+    def validated?
+      !!@validated
+    end
+
+    # we should guarantee the fqdn is always fully qualified
+    def fqdn
+      return name if name.blank? || domain.blank?
+      name.include?('.') ? name : "#{name}.#{domain}"
+    end
+
     protected
 
     def uniq_fields_with_hosts
@@ -121,6 +136,10 @@ module Nic
 
     def normalize_mac
       self.mac = Net::Validations.normalize_mac(mac)
+    end
+
+    def set_validated
+      @validated = true
     end
 
     # do we require a host object associate to the interface? defaults to true
