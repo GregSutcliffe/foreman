@@ -34,6 +34,14 @@ module FogExtensions
         scsi_controller.type
       end
 
+      def select_nic(fog_nics, attrs, identifier)
+        nic = attrs['interfaces_attributes'].detect  do |k,v|
+          v['id'] == identifier # should only be one
+        end.last
+        return nil if nic.nil?
+        fog_nics.detect {|fn| fn.network == nic["network"]} # just grab any nic on the same network
+      end
+
     end
   end
 end

@@ -38,6 +38,14 @@ module FogExtensions
         _("%{cores} Cores and %{memory} memory") % {:cores => cores, :memory => number_to_human_size(memory.to_i)}
       end
 
+      def select_nic(fog_nics, attrs, identifier)
+        nic = attrs['interfaces_attributes'].detect  do |k,v|
+          v['name'] == identifier # should only be one
+        end.last
+        return nil if nic.nil?
+        fog_nics.detect {|fn| fn.network == nic["network"]} # just grab any nic on the same network
+      end
+
     end
   end
 end

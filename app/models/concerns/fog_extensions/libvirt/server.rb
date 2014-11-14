@@ -33,6 +33,20 @@ module FogExtensions
         _("%{cpus} CPUs and %{memory} memory") % {:cpus => cpus, :memory => number_to_human_size(memory.to_i)}
       end
 
+      def interfaces
+        nics
+      end
+
+      def select_nic(fog_nics, attrs, identifier)
+        nic = attrs['nics_attributes'].detect  do |k,v|
+          v['id'] == identifier # should only be one
+        end.last
+        return nil if nic.nil?
+        match =   fog_nics.detect { |fn| fn.network == nic['network'] } # just grab any nic on the same network
+        match ||= fog_nics.detect { |fn| fn.bridge  == nic['bridge']  } # no network? try a bridge...
+        match
+      end
+
     end
   end
 end

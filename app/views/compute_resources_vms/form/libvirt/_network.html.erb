@@ -25,5 +25,6 @@
   </div>
   <%= selectable_f f, :model, %w(virtio rtl8139 ne2k_pci pcnet e1000), {},
                    { :label => _('NIC type'), :class => 'col-md-2' } %>
+  <%= text_f f, :id, :class => "col-md-2", :label => _("Nic ID"), :help_block => _("Identifier for NIC, as used on the Network tab") %>
   </div>
 </div>
