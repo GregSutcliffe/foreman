@@ -104,17 +104,50 @@ module Orchestration::Compute
       attrs = compute_resource.provided_attributes
       normalize_addresses if attrs.keys.include?(:mac) or attrs.keys.include?(:ip)
 
-      attrs.each do |foreman_attr, fog_attr |
-        # we can't ensure uniqueness of #foreman_attr using normal rails validations as that gets in a later step in the process
-        # therefore we must validate its not used already in our db.
-        value = vm.send(fog_attr)
-        value ||= find_address if foreman_attr == :ip
-        self.send("#{foreman_attr}=", value)
+      # mac and ip are properties of the NIC, and there may be more than one,
+      # so we need to loop. First store the nics returned from Fog in a local
+      # array so we can delete from it
+      fog_nics = vm.interfaces.dup
 
-        if value.blank? or (other_host = Host.send("find_by_#{foreman_attr}", value))
-          delCompute
-          return failure("#{foreman_attr} #{value} is already used by #{other_host}") if other_host
-          return failure("#{foreman_attr} value is blank!")
+      attrs.each do |foreman_attr, fog_attr |
+        if foreman_attr == :mac
+          #TODO, do we need handle :ip as well? for openstack / ec2 we only set a single
+          # interface (so host.ip will be fine), and we'd need to rethink #find_address :/
+
+          self.interfaces.each do |nic|
+            next if nic.identifier.nil? # no way to match if it has no label
+            fog_nic = vm.select_nic(fog_nics, compute_attributes,nic.identifier)
+            next if fog_nic.nil? # found no vm nics with this label, move on
+            value   = fog_nic.send(fog_attr)
+            logger.debug "Orchestration::Compute: nic #{nic.inspect} assigned to #{fog_nic.inspect}"
+            nic.send("#{foreman_attr}=",value)
+            fog_nics.delete(fog_nic) # don't use the same nic twice
+
+            # we can't ensure uniqueness of #foreman_attr using normal rails
+            # validations as that gets in a later step in the process
+            # therefore we must validate its not used already in our db.
+
+            # In future, we probably want to skip validation of macs/ips on the Nic
+            # macs can be duplicated if we are creating bonds
+            # ips can be duplicated if we have isolated subnets (needs an update in the Subnet model first)
+            # For now, we scope to physical devices only for the validations
+            if value.blank? or (other = Nic::Base.physical.send("find_by_#{foreman_attr}", value))
+              delCompute
+              return failure("#{foreman_attr} #{value} is already used by #{other}") if other
+              return failure("#{foreman_attr} value is blank!")
+            end
+          end
+        else
+          value = vm.send(fog_attr)
+          value ||= find_address if foreman_attr == :ip
+          self.send("#{foreman_attr}=", value)
+
+          # Check the db uniqueness here too, as per above
+          if value.blank? or (other = Host.send("find_by_#{foreman_attr}", value))
+            delCompute
+            return failure("#{foreman_attr} #{value} is already used by #{other}") if other
+            return failure("#{foreman_attr} value is blank!")
+          end
         end
       end
       true

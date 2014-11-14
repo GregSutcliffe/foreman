@@ -10,6 +10,7 @@
                      :label       => _('Network'),
                      :help_inline => remove_child_link("X", f, { :method => :'_delete', :title => _('remove network interface'), :class => 'label label-danger disable-unsupported' })
     %>
+    <%= text_f f, :id, :class => "col-md-2", :label => _("Nic ID"), :help_block => _("Identifier for NIC, as used on the Network tab") %>
   <% end %>
   </div>
 </div>
