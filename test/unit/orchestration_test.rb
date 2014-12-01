@@ -38,7 +38,7 @@ class OrchestrationTest < ActiveSupport::TestCase
     host = FactoryGirl.create(:host)
     nic = FactoryGirl.create(:nic_managed, :host => host, :ip => '192.168.0.2')
     nic.ip = '192.168.0.1'
-    clone = nic.send(:setup_object_clone, nic) { |clone| clone.mac = 'AA:AA:AA:AA:AA:AA'; clone.ip = 'override this' }
+    clone = nic.send(:setup_object_clone, nic) { |c| c.mac = 'AA:AA:AA:AA:AA:AA'; c.ip = 'override this' }
     refute_equal nic.object_id, clone.object_id
     assert_equal 'AA:AA:AA:AA:AA:AA', clone.mac
     assert_equal '192.168.0.2', clone.ip

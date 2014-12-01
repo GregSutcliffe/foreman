@@ -72,7 +72,7 @@ class NicTest < ActiveSupport::TestCase
 
   test "Mac address uniqueness validation is skipped for virtual NICs and unmanaged hosts" do
     host = FactoryGirl.create(:host, :managed)
-    physical = Nic::Base.create! :mac => "cabbccddeeff", :host => host
+    Nic::Base.create! :mac => "cabbccddeeff", :host => host # physical
     virtual = Nic::Base.new :mac => "cabbccddeeff", :host => host, :virtual => true
     assert virtual.valid?
     assert virtual.save

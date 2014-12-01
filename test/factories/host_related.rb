@@ -175,7 +175,8 @@ FactoryGirl.define do
         )
       }
       interfaces { [ FactoryGirl.build(:nic_primary_and_provision,
-                                       :ip => subnet.network.sub(/0\Z/, '1')) ] }
+                                       :ip => subnet.network.sub(/0\Z/, '1')) ]
+      }
     end
 
     trait :with_dns_orchestration do
@@ -202,7 +203,8 @@ FactoryGirl.define do
                                        :primary => true,
                                        :provision => true,
                                        :domain => FactoryGirl.build(:domain),
-                                       :ip => subnet.network.sub(/0\Z/, '1')) ] }
+                                       :ip => subnet.network.sub(/0\Z/, '1')) ]
+      }
     end
 
     trait :with_tftp_orchestration do
@@ -213,7 +215,8 @@ FactoryGirl.define do
                                        :provision => true,
                                        :domain => FactoryGirl.build(:domain),
                                        :subnet => subnet,
-                                       :ip => subnet.network.sub(/0\Z/, '2')) ] }
+                                       :ip => subnet.network.sub(/0\Z/, '2')) ]
+      }
     end
 
     trait :with_puppet_orchestration do
