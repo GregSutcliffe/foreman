@@ -125,10 +125,10 @@ class FactParserTest < ActiveSupport::TestCase
     host = FactoryGirl.build(:host)
     parser = get_parser
     parser.stubs(:interfaces).returns({
-                                        'br0'   => { 'ipaddress' => '30.0.0.30', 'macaddress' => '00:00:00:00:00:30'},
-                                        'em1'   => { 'ipaddress' => '10.0.0.10', 'macaddress' => '00:00:00:00:00:10'},
-                                        'em2'   => { 'ipaddress' => '12.0.0.12', 'macaddress' => '00:00:00:00:00:12'},
-                                        'bond0' => { 'ipaddress' => '15.0.0.15', 'macaddress' => '00:00:00:00:00:15'},
+      'br0' => {'ipaddress' => '30.0.0.30', 'macaddress' => '00:00:00:00:00:30'},
+      'em1' => {'ipaddress' => '10.0.0.10', 'macaddress' => '00:00:00:00:00:10'},
+      'em2' => {'ipaddress' => '12.0.0.12', 'macaddress' => '00:00:00:00:00:12'},
+      'bond0' => {'ipaddress' => '15.0.0.15', 'macaddress' => '00:00:00:00:00:15'},
     }.with_indifferent_access)
 
     Resolv::DNS.any_instance.stubs(:getnames).returns([])
@@ -143,12 +143,12 @@ class FactParserTest < ActiveSupport::TestCase
     host = FactoryGirl.build(:host)
     parser = get_parser
     parser.stubs(:interfaces).returns({
-                                        'br0'   => { 'ipaddress' => '30.0.0.30', 'macaddress' => '00:00:00:00:00:30'},
-                                        'em0'   => { 'ipaddress' => '',          'macaddress' => ''},
-                                        'em1'   => { 'ipaddress' => '10.0.0.10', 'macaddress' => '00:00:00:00:00:10'},
-                                        'em2'   => { 'ipaddress' => '12.0.0.12', 'macaddress' => '00:00:00:00:00:12'},
-                                        'bond0' => { 'ipaddress' => '15.0.0.15', 'macaddress' => '00:00:00:00:00:15'},
-                                      }.with_indifferent_access)
+      'br0' => {'ipaddress' => '30.0.0.30', 'macaddress' => '00:00:00:00:00:30'},
+      'em0' => {'ipaddress' => '', 'macaddress' => ''},
+      'em1' => {'ipaddress' => '10.0.0.10', 'macaddress' => '00:00:00:00:00:10'},
+      'em2' => {'ipaddress' => '12.0.0.12', 'macaddress' => '00:00:00:00:00:12'},
+      'bond0' => {'ipaddress' => '15.0.0.15', 'macaddress' => '00:00:00:00:00:15'},
+    }.with_indifferent_access)
 
     Resolv::DNS.any_instance.stubs(:getnames).returns([])
     found = parser.suggested_primary_interface(host)
@@ -161,10 +161,10 @@ class FactParserTest < ActiveSupport::TestCase
     host = FactoryGirl.build(:host)
     parser = get_parser
     parser.stubs(:interfaces).returns({
-                                        'br0'   => { 'ipaddress' => '30.0.0.30', 'macaddress' => '00:00:00:00:00:30'},
-                                        'bond1' => { 'ipaddress' => '', 'macaddress' => ''},
-                                        'bond0' => { 'ipaddress' => '15.0.0.15', 'macaddress' => '00:00:00:00:00:15'},
-                                      }.with_indifferent_access)
+      'br0' => {'ipaddress' => '30.0.0.30', 'macaddress' => '00:00:00:00:00:30'},
+      'bond1' => {'ipaddress' => '', 'macaddress' => ''},
+      'bond0' => {'ipaddress' => '15.0.0.15', 'macaddress' => '00:00:00:00:00:15'},
+    }.with_indifferent_access)
 
     Resolv::DNS.any_instance.stubs(:getnames).returns([])
     found = parser.suggested_primary_interface(host)
@@ -177,9 +177,9 @@ class FactParserTest < ActiveSupport::TestCase
     host = FactoryGirl.build(:host)
     parser = get_parser
     parser.stubs(:interfaces).returns({
-                                        'br1'   => { 'ipaddress' => '',          'macaddress' => ''},
-                                        'br0'   => { 'ipaddress' => '30.0.0.30', 'macaddress' => '00:00:00:00:00:30'},
-                                      }.with_indifferent_access)
+      'br1'   => { 'ipaddress' => '',          'macaddress' => ''},
+      'br0'   => { 'ipaddress' => '30.0.0.30', 'macaddress' => '00:00:00:00:00:30'},
+    }.with_indifferent_access)
 
     Resolv::DNS.any_instance.stubs(:getnames).returns([])
     found = parser.suggested_primary_interface(host)
@@ -192,9 +192,9 @@ class FactParserTest < ActiveSupport::TestCase
     host = FactoryGirl.build(:host)
     parser = get_parser
     parser.stubs(:interfaces).returns({
-                                        'br1'   => { 'ipaddress' => '',          'macaddress' => ''},
-                                        'br0'   => { 'ipaddress' => '',          'macaddress' => ''},
-                                      }.with_indifferent_access)
+      'br1' => {'ipaddress' => '', 'macaddress' => ''},
+      'br0' => {'ipaddress' => '', 'macaddress' => ''},
+    }.with_indifferent_access)
 
     Resolv::DNS.any_instance.stubs(:getnames).returns([])
     found = parser.suggested_primary_interface(host)
