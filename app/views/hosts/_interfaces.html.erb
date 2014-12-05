@@ -2,17 +2,6 @@
 <% interfaces_invalid = @host.interfaces.any?{ |i| i.validated? && !i.valid? } %>
 
 <fieldset id="interfaces" data-url="<%= new_interface_path %>">
-  <legend class="clearfix">
-    <span <%= interfaces_invalid ? 'class="has-error"'.html_safe : '' %>>
-    <%= _("Interfaces") %>
-    </span>
-    <div class="btn-toolbar pull-right">
-      <button type="button" onclick="edit_interface();return false;"
-        class="info btn btn-success" id="addInterface"
-        title="add new network interface">+ <%= _('Add Interface') %></button>
-    </div>
-  </legend>
-
   <% if interfaces_invalid %>
   <p class="alert alert-danger">
     <%= _("Some of the interfaces are invalid. Please check the table below.") %>
@@ -62,6 +51,12 @@
 
   </table>
 
+  <div class="btn-toolbar">
+    <button type="button" onclick="edit_interface();return false;"
+      class="info btn btn-success" id="addInterface"
+                                   title="add new network interface">+ <%= _('Add Interface') %>
+    </button>
+  </div>
 
   <!-- hidden interface forms -->
   <div id="interfaceForms">
