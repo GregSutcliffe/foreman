@@ -215,12 +215,14 @@ function update_form(element, options) {
     success: function(response) {
       $('form').replaceWith(response);
       multiSelectOnLoad();
-      $("[id$='subnet_id']").first().change();
       // to handle case if def process_taxonomy changed compute_resource_id to nil
       if( !$('#host_compute_resource_id').val() ) {
         $('#host_compute_resource_id').change();
       }
       update_capabilities($('#host_compute_resource_id').val() ? $('#capabilities').val() : 'build');
+
+      interface_subnet_selected(primary_nic_form().find('.interface_subnet'));
+
       $(document.body).trigger('ContentLoad');
     }
   })
@@ -612,6 +614,7 @@ function interface_subnet_selected(element) {
     dataType:'json',
     success:function (result) {
       interface_ip.val(result['ip']);
+      update_interface_table();
     },
     complete:function () {
       $(element).indicator_hide();

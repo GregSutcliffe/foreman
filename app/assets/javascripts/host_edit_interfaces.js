@@ -54,7 +54,7 @@ function save_interface_modal() {
 }
 
 function sync_primary_name(ovewrite_blank) {
-  var nic_name = $('#interfaceForms .interface_primary:checked').closest('fieldset').find('.interface_name');
+  var nic_name = primary_nic_form().find('.interface_name');
   var host_name = $('#host_name');
 
   if (ovewrite_blank && (nic_name.val().length == 0))
@@ -196,6 +196,10 @@ function confirm_flag_change(element, element_selector, massage) {
   }
 }
 
+function primary_nic_form() {
+  return $('#interfaceForms .interface_primary:checked').closest('fieldset');
+}
+
 $(document).on('click', '.interface_primary', function () {
   var confirmed = confirm_flag_change(this, '.interface_primary',
     __("Some other interface is already set as primary. Are you sure you want to use this one instead?")
@@ -219,7 +223,7 @@ $(document).on('click', '.interface_provision', function () {
 
 $(document).on('change', '#host_name', function () {
   // copy host name to the primary interface's name
-  $('#interfaceForms .interface_primary:checked').closest('fieldset').find('.interface_name').val($(this).val());
+  primary_nic_form().find('.interface_name').val($(this).val());
   update_interface_table();
   update_fqdn();
 });
@@ -246,7 +250,7 @@ $(document).on('click', '.provision-flag', function () {
 
 function update_fqdn() {
   var host_name = $('#host_name').val();
-  var domain_name = $('#interfaceForms .interface_primary:checked').closest('fieldset').find('.interface_domain option:selected').text();
+  var domain_name = primary_nic_form().find('.interface_domain option:selected').text();
 
   var name = fqdn(host_name, domain_name)
   if (name.length > 0)
