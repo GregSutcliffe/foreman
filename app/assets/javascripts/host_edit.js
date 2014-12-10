@@ -6,7 +6,6 @@ function computeResourceSelected(item){
   var compute = $(item).val();
   if (compute == '' && /compute_resource/.test($(item).attr('name'))) {
     //Bare metal compute resource
-    $('#mac_address').show();
     $("#model_name").show();
     $('#compute_resource').empty();
     $('#vm_details').empty();
@@ -15,7 +14,6 @@ function computeResourceSelected(item){
     update_capabilities('build');
   } else {
     //Real compute resource or any compute profile
-    $('#mac_address').hide();
     $("#model_name").hide();
     $("#compute_resource_tab").show();
     $("#compute_profile").show();
@@ -228,40 +226,6 @@ function update_form(element, options) {
   })
 }
 
-function subnet_selected(element){
-  var ipam_text =  $("#host_ip").parentsUntil('.clearfix').find(".help-block,.help-inline");
-  if (selectedSubnetHasIPAM()) {
-    ipam_text.removeClass('hide')
-  } else {
-    ipam_text.addClass('hide');
-    return false
-  }
-
-  var subnet_id = $(element).val();
-  if (subnet_id == '' || $('#host_ip').size() == 0) return;
-
-  // We do not query the proxy if the host_ip field is filled in and contains an
-  // IP that is in the selected subnet
-  var drop_text = $(element).children(":selected").text();
-  if (drop_text.length !=0 && drop_text.search(/^.+ \([0-9\.\/]+\)/) != -1) {
-    var details = drop_text.replace(/^.+\(/, "").replace(")","").split("/");
-    if (subnet_contains(details[0], details[1], $('#host_ip').val()))
-      return;
-  }
-  var attrs = attribute_hash(["subnet_id", "host_mac", 'organization_id', 'location_id']);
-  $(element).indicator_show();
-  var url = $(element).data('url');
-  $.ajax({
-    data: attrs,
-    type:'post',
-    url: url,
-    complete: function(){  $(element).indicator_hide();},
-    success: function(data){
-      $('#host_ip').val(data.ip);
-    }
-  })
-}
-
 function subnet_contains(number, cidr, ip){
   var int_ip     = _to_int(ip);
   var int_number = _to_int(number);
@@ -276,22 +240,6 @@ function _to_int(str){
     integer = (integer * 256) + parseInt(nibble[i]);
   }
   return integer;
-}
-
-function domain_selected(element){
-  var attrs   = attribute_hash(['domain_id', 'organization_id', 'location_id']);
-  var url = $(element).data('url');
-  $(element).indicator_show();
-  $.ajax({
-    data: attrs,
-    type:'post',
-    url: url,
-    complete: function(){  $(element).indicator_hide();},
-    success: function(request) {
-      $('#subnet_select').html(request);
-      reload_host_params();
-    }
-  })
 }
 
 function architecture_selected(element){
