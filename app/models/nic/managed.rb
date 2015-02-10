@@ -128,7 +128,7 @@ module Nic
 
     # we must also clone host object so we can detect host attributes changes
     def setup_clone
-      return if new_record? or host.new_record?
+      return if new_record?
       @old = super
       @old.host = host.setup_clone
       @old
